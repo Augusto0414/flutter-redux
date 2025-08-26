@@ -9,8 +9,15 @@ void authMiddleware(
 ) async {
   if (action is LoginAction) {
     await Future.delayed(Duration(seconds: 2));
-    store.dispatch(LogoutAction());
+    try {
+      if (action.email == 'test@redux.com' && action.password == '123456') {
+        store.dispatch(LoginSuccessAction(token: 'dummy_token'));
+      } else {
+        store.dispatch(AuthErrorAction(error: 'Invalid username or password'));
+      }
+    } catch (e) {
+      store.dispatch(AuthErrorAction(error: e.toString()));
+    }
   }
-
   next(action);
 }
