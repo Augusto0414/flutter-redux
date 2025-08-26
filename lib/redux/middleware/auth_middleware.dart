@@ -8,6 +8,7 @@ void authMiddleware(
   NextDispatcher next,
 ) async {
   if (action is LoginAction) {
+    next(action);
     await Future.delayed(Duration(seconds: 2));
     try {
       if (action.email == 'test@redux.com' && action.password == '123456') {
@@ -18,6 +19,7 @@ void authMiddleware(
     } catch (e) {
       store.dispatch(AuthErrorAction(error: e.toString()));
     }
+    return;
   }
   next(action);
 }

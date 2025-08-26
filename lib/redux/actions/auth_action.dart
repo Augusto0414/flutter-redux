@@ -13,5 +13,5 @@ class LoginSuccessAction {
 
 class AuthErrorAction {
   final String error;
-  AuthErrorAction(String s, {required this.error});
+  AuthErrorAction({required this.error});
 }
