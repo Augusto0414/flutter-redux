@@ -8,33 +8,36 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StoreConnector<AuthState, AuthState>(
-      distinct: true,
-      converter: (store) => store.state,
-      builder: (context, authState) {
-        if (authState.status == AuthStatus.unauthenticated) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacementNamed(context, '/login');
-          });
-        }
+    return Container(
+      color: Colors.white,
+      child: StoreConnector<AuthState, AuthState>(
+        distinct: true,
+        converter: (store) => store.state,
+        builder: (context, authState) {
+          if (authState.status == AuthStatus.unauthenticated) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushReplacementNamed(context, '/login');
+            });
+          }
 
-        return Scaffold(
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildWelcomeMessage(),
-              const SizedBox(height: 20),
-              StoreConnector<AuthState, VoidCallback>(
-                converter: (store) =>
-                    () => store.dispatch(LogoutAction()),
-                builder: (context, logoutCallback) {
-                  return _buildLogoutButton(logoutCallback);
-                },
-              ),
-            ],
-          ),
-        );
-      },
+          return Scaffold(
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildWelcomeMessage(),
+                const SizedBox(height: 20),
+                StoreConnector<AuthState, VoidCallback>(
+                  converter: (store) =>
+                      () => store.dispatch(LogoutAction()),
+                  builder: (context, logoutCallback) {
+                    return _buildLogoutButton(logoutCallback);
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

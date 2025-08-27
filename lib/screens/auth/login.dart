@@ -45,6 +45,12 @@ class _LoginState extends State<Login> {
                         MaterialPageRoute(builder: (_) => HomePage()),
                       );
                     }
+                    if (newState.status == AuthStatus.unauthenticated &&
+                        newState.error != null) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(_buildSnackBar(newState.error!));
+                    }
                   },
                   builder: (context, authState) {
                     return Form(
@@ -151,6 +157,20 @@ class _LoginState extends State<Login> {
         end: Alignment.bottomCenter,
         colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF), Color(0xFFE6F2EC)],
       ),
+    );
+  }
+
+  SnackBar _buildSnackBar(String message) {
+    return SnackBar(
+      content: Text(
+        message,
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+        ),
+      ),
+      backgroundColor: Colors.red,
     );
   }
 
