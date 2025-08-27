@@ -1,0 +1,11 @@
+export 'package:flutter/material.dart';
+export 'package:flutter_redux/flutter_redux.dart';
+export 'package:google_fonts/google_fonts.dart';
+export 'package:prueba_tecnica/helpers/auth_validation.dart';
+export 'package:prueba_tecnica/redux/actions/auth_action.dart';
+export 'package:prueba_tecnica/redux/models/auth_state.dart';
+export 'package:prueba_tecnica/screens/auth/widgets/box_decoration.dart';
+export 'package:prueba_tecnica/screens/auth/widgets/elevated_button.dart';
+export 'package:prueba_tecnica/screens/auth/widgets/header.dart';
+export 'package:prueba_tecnica/screens/auth/widgets/input_decoration.dart';
+export 'package:prueba_tecnica/screens/home/home.dart';

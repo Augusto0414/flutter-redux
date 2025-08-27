@@ -1,12 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:prueba_tecnica/helpers/auth_validation.dart';
-import 'package:prueba_tecnica/redux/actions/auth_action.dart';
-import 'package:prueba_tecnica/redux/models/auth_state.dart';
-import 'package:prueba_tecnica/screens/auth/widgets/box_decoration.dart';
-import 'package:prueba_tecnica/screens/auth/widgets/elevated_button.dart';
-import 'package:prueba_tecnica/screens/auth/widgets/input_decoration.dart';
+import 'index.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -16,123 +8,164 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: CustomBoxDecoration.build(),
-              child: StoreConnector<AuthState, AuthState>(
-                converter: (store) => store.state,
-                builder: (context, authState) {
-                  return Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Correo',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF1E2939),
-                              ),
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: CustomInputDecoration.build(
-                            hintText: 'ejemplo@correo.com',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                          ),
-                          validator: (value) {
-                            return AuthValidation.validateEmail(value);
-                          },
-                        ),
-                        const SizedBox(height: 5),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Correo',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF1E2939),
-                              ),
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: passwordController,
-                          obscureText: _obscurePassword,
-                          decoration: CustomInputDecoration.build(
-                            hintText: '********',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            isPassword: true,
-                            obscurePassword: _obscurePassword,
-                            togglePasswordVisibility: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                          validator: (value) {
-                            return AuthValidation.validatePassword(value);
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          style: CustomElevatedButton.build(),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              authState.status != AuthStatus.loading
-                                  ? StoreProvider.of<AuthState>(
-                                      context,
-                                    ).dispatch(
-                                      LoginAction(
-                                        email: emailController.text,
-                                        password: passwordController.text,
-                                      ),
-                                    )
-                                  : null;
-                            }
-                          },
-                          child: Text(
-                            '${authState.status == AuthStatus.loading ? 'Cargando...' : 'Iniciar sesión'}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+      body: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        width: double.infinity,
+        height: double.infinity,
+        decoration: _buildGradientDecoration(),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 40.0),
+                child: const CustomHeader(),
               ),
-            ),
-          ],
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(top: 36.0, bottom: 16.0),
+                padding: const EdgeInsets.all(16.0),
+                decoration: CustomBoxDecoration.build(),
+                child: StoreConnector<AuthState, AuthState>(
+                  converter: (store) => store.state,
+                  onDidChange: (previousState, newState) {
+                    if (previousState?.token == null &&
+                        newState.token != null) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => HomePage()),
+                      );
+                    }
+                  },
+                  builder: (context, authState) {
+                    return Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildEmailField(),
+                          const SizedBox(height: 15),
+                          _buildPasswordField(),
+                          const SizedBox(height: 20),
+                          _buildLoginButton(authState),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLoginButton(AuthState authState) {
+    final isLoading = authState.status == AuthStatus.loading;
+    return ElevatedButton(
+      style: CustomElevatedButton.build(),
+      onPressed: isLoading ? null : _handleLogin,
+      child: Text(
+        isLoading ? 'Cargando...' : 'Iniciar sesión',
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmailField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel('Correo'),
+        const SizedBox(height: 4),
+        TextFormField(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: CustomInputDecoration.build(
+            hintText: 'ejemplo@correo.com',
+            prefixIcon: const Icon(Icons.email_outlined),
+          ),
+          validator: AuthValidation.validateEmail,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel('Contraseña'),
+        const SizedBox(height: 4),
+        TextFormField(
+          controller: _passwordController,
+          obscureText: _obscurePassword,
+          decoration: CustomInputDecoration.build(
+            hintText: '********',
+            prefixIcon: const Icon(Icons.lock_outline),
+            isPassword: true,
+            obscurePassword: _obscurePassword,
+            togglePasswordVisibility: _togglePasswordVisibility,
+          ),
+          validator: AuthValidation.validatePassword,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFieldLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 5),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF1E2939),
+          ),
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _buildGradientDecoration() {
+    return const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF), Color(0xFFE6F2EC)],
+      ),
+    );
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
+  }
+
+  void _handleLogin() {
+    if (!_formKey.currentState!.validate()) return;
+    StoreProvider.of<AuthState>(context).dispatch(
+      LoginAction(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
       ),
     );
   }
